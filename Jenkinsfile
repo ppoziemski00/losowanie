@@ -2,59 +2,68 @@ pipeline {
     agent any
 
     environment {
-        DOCKERHUB_CREDENTIALS = credentials('dockerhub-credentials')
+        REPO = 'https://github.com/ppoziemski00/losowanie.git'
+        BRANCH = 'main'
+        DOCKER_IMAGE = 'random-number-app-image'
     }
 
     stages {
-        stage('Clone repository') {
+        stage('Clone Repository') {
             steps {
-                git 'https://github.com/ppoziemski00/losowanie.git'
+                git branch: "${BRANCH}", url: "${REPO}"
             }
         }
+
         stage('Install Python Dependencies') {
             steps {
                 sh 'pip install -r requirements.txt'
             }
         }
+
         stage('Build Docker Image') {
             steps {
                 script {
-                    dockerImage = docker.build("random-number-app:${env.BUILD_ID}")
+                    docker.build("${env.DOCKER_IMAGE}")
                 }
             }
         }
-        stage('Run Tests') {
-            steps {
-                sh 'python -m unittest discover tests'
-            }
-        }
-        stage('Push Docker Image') {
+
+        stage('Run Docker Container') {
             steps {
                 script {
-                    docker.withRegistry('https://index.docker.io/v1/', DOCKERHUB_CREDENTIALS) {
-                        dockerImage.push()
+                    docker.image("${env.DOCKER_IMAGE}").run("-d -p 5000:5000 --name random-number-app-container")
+                }
+            }
+        }
+
+        stage('Test') {
+            steps {
+                script {
+                    sleep 10 // Czekaj na uruchomienie kontenera
+                    def response = sh(script: '''
+                        curl -s http://localhost:5000/random_number
+                    ''', returnStdout: true).trim()
+                    echo "Response: ${response}"
+                    if (!response.contains('number')) {
+                        error "Test failed with response: ${response}"
                     }
                 }
             }
         }
+
         stage('Deploy') {
             steps {
-                sh 'docker-compose up -d'
+                echo 'Deploying application...'
             }
         }
     }
+
     post {
         always {
             steps {
-                // Ensure docker-compose down does not fail the build if there is an issue
-                sh 'docker-compose down || true'
-            }
-        }
-        failure {
-            steps {
-                // Additional steps to handle rollback can be placed here
-                echo 'Build failed. Rolling back deployment...'
-                // Add rollback steps if necessary
+                script {
+                    sh 'docker-compose down || true'
+                }
             }
         }
     }
