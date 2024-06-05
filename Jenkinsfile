@@ -14,16 +14,10 @@ pipeline {
             }
         }
 
-        stage('Install Python Dependencies') {
-            steps {
-                sh 'pip install -r requirements.txt'
-            }
-        }
-
         stage('Build Docker Image') {
             steps {
                 script {
-                    docker.build("${env.DOCKER_IMAGE}")
+                    dockerImage = docker.build("${env.DOCKER_IMAGE}")
                 }
             }
         }
@@ -31,7 +25,7 @@ pipeline {
         stage('Run Docker Container') {
             steps {
                 script {
-                    docker.image("${env.DOCKER_IMAGE}").run("-d -p 5000:5000 --name random-number-app-container")
+                    sh 'docker run -d -p 5000:5000 --name random-number-app-container ${env.DOCKER_IMAGE}'
                 }
             }
         }
@@ -62,7 +56,9 @@ pipeline {
         always {
             steps {
                 script {
-                    sh 'docker-compose down || true'
+                    // Stop and remove the Docker container
+                    sh 'docker stop random-number-app-container || true'
+                    sh 'docker rm random-number-app-container || true'
                 }
             }
         }
