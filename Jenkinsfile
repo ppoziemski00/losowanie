@@ -44,23 +44,21 @@ pipeline {
         }
     }
     post {
-        success {
-            retry(3) {
-                emailext(
-                    to: 'you@example.com',
-                    subject: "SUCCESS: ${env.JOB_NAME} [${env.BUILD_NUMBER}]",
-                    body: "Build succeeded"
-                )
-            }
-        }
         failure {
-            retry(3) {
-                emailext(
-                    to: 'you@example.com',
-                    subject: "FAILURE: ${env.JOB_NAME} [${env.BUILD_NUMBER}]",
-                    body: "Build failed"
-                )
-            }
+            emailext (
+                subject: "Job '${env.JOB_NAME}' (${env.BUILD_NUMBER}) failed",
+                body: "Napotkano błędy, sprawdź konsolę.",
+                recipientProviders: [[$class: 'DevelopersRecipientProvider']]
+            )
+        }
+
+        success {
+            emailext (
+                subject: "Job '${env.JOB_NAME}' (${env.BUILD_NUMBER}) succeeded",
+                body: "Proces przebiegł pomyślnie, nie napotkano błędów.",
+                recipientProviders: [[$class: 'DevelopersRecipientProvider']]
+            )
+        }
             script {
                 sh 'docker-compose down'
             }
