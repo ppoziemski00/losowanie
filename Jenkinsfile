@@ -25,7 +25,11 @@ pipeline {
         stage('Run Docker Container') {
             steps {
                 script {
-                    sh 'docker run -d -p 5000:5000 --name random-number-app-container ${env.DOCKER_IMAGE}'
+                    // Stop any running instance of the container
+                    sh 'docker stop random-number-app-container || true'
+                    sh 'docker rm random-number-app-container || true'
+                    // Run the container
+                    sh "docker run -d -p 5000:5000 --name random-number-app-container ${env.DOCKER_IMAGE}"
                 }
             }
         }
@@ -56,7 +60,7 @@ pipeline {
         always {
             steps {
                 script {
-                    // Stop and remove the Docker container
+                    // Ensure the Docker container is stopped and removed
                     sh 'docker stop random-number-app-container || true'
                     sh 'docker rm random-number-app-container || true'
                 }
