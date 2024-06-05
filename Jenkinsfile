@@ -46,10 +46,8 @@ pipeline {
     post {
         always {
             steps {
-                script {
-                    // Ensure docker-compose down does not fail the build if there is an issue
-                    sh 'docker-compose down || true'
-                }
+                // Ensure docker-compose down does not fail the build if there is an issue
+                sh 'docker-compose down || true'
             }
         }
     }
