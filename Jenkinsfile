@@ -44,12 +44,7 @@ pipeline {
         }
     }
     post {
-        success {
-            script {
-                sh 'docker-compose down'
-            }
-        }
-        failure {
+        always {
             script {
                 sh 'docker-compose down'
             }
