@@ -46,7 +46,7 @@ pipeline {
     post {
         always {
             script {
-                sh 'docker-compose down'
+                sh 'docker-compose down || true'  // '|| true' ensures the pipeline doesn't fail if docker-compose down fails
             }
         }
     }
