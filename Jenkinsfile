@@ -8,7 +8,7 @@ pipeline {
     stages {
         stage('Clone repository') {
             steps {
-                git 'https://github.com/your-repo/random-number-app.git'
+                git 'https://github.com/ppoziemski00/losowanie.git'
             }
         }
         stage('Install Python Dependencies') {
