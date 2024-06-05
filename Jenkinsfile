@@ -11,6 +11,11 @@ pipeline {
                 git 'https://github.com/your-repo/random-number-app.git'
             }
         }
+        stage('Install Python Dependencies') {
+            steps {
+                sh 'pip install -r requirements.txt'
+            }
+        }
         stage('Build Docker Image') {
             steps {
                 script {
@@ -20,7 +25,6 @@ pipeline {
         }
         stage('Run Tests') {
             steps {
-                sh 'pip install -r requirements.txt'
                 sh 'python -m unittest discover tests'
             }
         }
@@ -41,18 +45,22 @@ pipeline {
     }
     post {
         success {
-            emailext(
-                to: 'you@example.com',
-                subject: "SUCCESS: ${env.JOB_NAME} [${env.BUILD_NUMBER}]",
-                body: "Build succeeded"
-            )
+            retry(3) {
+                emailext(
+                    to: 'you@example.com',
+                    subject: "SUCCESS: ${env.JOB_NAME} [${env.BUILD_NUMBER}]",
+                    body: "Build succeeded"
+                )
+            }
         }
         failure {
-            emailext(
-                to: 'you@example.com',
-                subject: "FAILURE: ${env.JOB_NAME} [${env.BUILD_NUMBER}]",
-                body: "Build failed"
-            )
+            retry(3) {
+                emailext(
+                    to: 'you@example.com',
+                    subject: "FAILURE: ${env.JOB_NAME} [${env.BUILD_NUMBER}]",
+                    body: "Build failed"
+                )
+            }
             script {
                 sh 'docker-compose down'
             }
