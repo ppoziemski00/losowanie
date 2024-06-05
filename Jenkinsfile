@@ -50,5 +50,12 @@ pipeline {
                 sh 'docker-compose down || true'
             }
         }
+        failure {
+            steps {
+                // Additional steps to handle rollback can be placed here
+                echo 'Build failed. Rolling back deployment...'
+                // Add rollback steps if necessary
+            }
+        }
     }
 }
