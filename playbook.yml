@@ -1,0 +1,12 @@
+- name: Setup environment
+  hosts: webservers
+  tasks:
+    - name: Ensure Docker is installed
+      apt:
+        name: docker.io
+        state: present
+
+    - name: Start application using Docker Compose
+      shell: docker-compose up -d
+      args:
+        chdir: /path/to/your/app
