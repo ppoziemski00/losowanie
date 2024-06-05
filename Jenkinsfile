@@ -3,7 +3,6 @@ pipeline {
 
     environment {
         DOCKERHUB_CREDENTIALS = credentials('dockerhub-credentials')
-        EMAIL_RECIPIENTS = 'you@example.com'
     }
 
     stages {
@@ -46,21 +45,11 @@ pipeline {
     }
     post {
         success {
-            emailext (
-                to: "${env.EMAIL_RECIPIENTS}",
-                subject: "Job '${env.JOB_NAME}' (${env.BUILD_NUMBER}) succeeded",
-                body: "Proces przebiegł pomyślnie, nie napotkano błędów."
-            )
             script {
                 sh 'docker-compose down'
             }
         }
         failure {
-            emailext (
-                to: "${env.EMAIL_RECIPIENTS}",
-                subject: "Job '${env.JOB_NAME}' (${env.BUILD_NUMBER}) failed",
-                body: "Napotkano błędy, sprawdź konsolę."
-            )
             script {
                 sh 'docker-compose down'
             }
