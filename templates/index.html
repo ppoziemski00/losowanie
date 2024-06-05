@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Random Number Generator</title>
+</head>
+<body>
+    <h1>Random Number Generator</h1>
+    <button onclick="generateNumber()">Generate Number</button>
+    <p id="number"></p>
+
+    <script>
+        function generateNumber() {
+            fetch('/random_number')
+                .then(response => response.json())
+                .then(data => {
+                    document.getElementById('number').innerText = data.number;
+                });
+        }
+    </script>
+</body>
+</html>
