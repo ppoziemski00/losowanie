@@ -33,6 +33,13 @@ pipeline {
                 sh 'docker-compose up -d'
             }
         }
+        stage('SonarQube analysis') {
+    steps {
+        withSonarQubeEnv('SonarQube') {
+            sh 'sonar-scanner'
+        }
+    }
+}
     }
     post {
         success {
